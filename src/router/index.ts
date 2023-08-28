@@ -33,39 +33,39 @@ export default route(function (/* { store, ssrContext } */) {
     ),
   });
 
-  Router.beforeEach(async (to, from, next) => {
-    const { isAuthenticated, user } = storeToRefs(userStore)
-    if (to.matched.some((route) => route.meta.isAuthRequired)) {
-      try {
-        if (!user.value && isAuthenticated) await userStore.fetchUser()
-      } catch (error) {}
+  // Router.beforeEach(async (to, from, next) => {
+  //   const { isAuthenticated, user } = storeToRefs(userStore)
+  //   if (to.matched.some((route) => route.meta.isAuthRequired)) {
+  //     try {
+  //       if (!user.value && isAuthenticated) await userStore.fetchUser()
+  //     } catch (error) {}
 
-      if (isAuthenticated.value) {
-        // if (to.fullPath === '/teacher' && !permissions.value?.includes('api.v1.admin.teachers.show')) {
-        //   return next({
-        //     path: 'teacher/teaching-history',
-        //     query: {
-        //       id: user.value?.id //TODO: improve, bug
-        //     }
-        //   })
-        // }
-        // const required = to.matched.find((route) => route.meta.required)
-        //   ? (to.matched.find((route) => route.meta.required)?.meta.required as string)
-        //   : ''
-        // if (permissions.value?.includes(required)) return next()
-        // userStore.setAccessDenied()
-        return next()
-      }
-      return next('/')
-    }
-    if (
-      isAuthenticated.value &&
-      (to.fullPath === '/' || to.path === 'forgot-password')
-      //|| to.fullPath === '/contact-us'
-    )
-      return next('/user')
-    next()
-  })
+  //     if (isAuthenticated.value) {
+  //       // if (to.fullPath === '/teacher' && !permissions.value?.includes('api.v1.admin.teachers.show')) {
+  //       //   return next({
+  //       //     path: 'teacher/teaching-history',
+  //       //     query: {
+  //       //       id: user.value?.id //TODO: improve, bug
+  //       //     }
+  //       //   })
+  //       // }
+  //       // const required = to.matched.find((route) => route.meta.required)
+  //       //   ? (to.matched.find((route) => route.meta.required)?.meta.required as string)
+  //       //   : ''
+  //       // if (permissions.value?.includes(required)) return next()
+  //       // userStore.setAccessDenied()
+  //       return next()
+  //     }
+  //     return next('/')
+  //   }
+  //   if (
+  //     isAuthenticated.value &&
+  //     (to.fullPath === '/' || to.path === 'forgot-password')
+  //     //|| to.fullPath === '/contact-us'
+  //   )
+  //     return next('/user')
+  //   next()
+  // })
 
   return Router;
 });
