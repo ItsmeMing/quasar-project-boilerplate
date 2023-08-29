@@ -1,0 +1,45 @@
+@mixin responsive($breakpoint) {
+  @if $breakpoint==xs {
+    @media (min-width: 450px) {
+      @content;
+    }
+  }
+  @if $breakpoint==sm {
+    @media (min-width: 640px) {
+      @content;
+    }
+  }
+
+  @if $breakpoint==md {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+
+  @if $breakpoint==lg {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+
+  @if $breakpoint==xl {
+    @media (min-width: 1280px) {
+      @content;
+    }
+  }
+  @if $breakpoint==2xl {
+    @media (min-width: 1440px) {
+      @content;
+    }
+  }
+  @if $breakpoint==3xl {
+    @media (min-width: 1921px) {
+      @content;
+    }
+  }
+  @if $breakpoint==4xl {
+    @media (min-width: 2561px) {
+      @content;
+    }
+  }
+}

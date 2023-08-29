@@ -41,10 +41,10 @@ function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConf
 function onResponse<T>(response: AxiosResponse<APIResponse<T>, any>) {
   const { data, config, status } = response;
   const { method, url } = config;
-  //This depends on your BE API structure, modify types in APIResponse
+  //This depends on your BE API structure, modify types in APIResponse interface
   const { status_code } = data;
   //
-  if ([201, 401, 422, 500].includes(status_code)) return Promise.reject(data);
+  if ([201, 401, 403, 422, 500].includes(status_code)) return Promise.reject(data);
   console.log(`🚀 [API] ${method?.toUpperCase()} ${url} | Request ${status} | API ${status_code}`);
   return response;
 }
