@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { boot } from 'quasar/wrappers'
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { LocalStorage } from 'quasar'
 
 declare module '@vue/runtime-core' {
@@ -18,36 +18,60 @@ function deleteEmptyValue(data: Record<string, unknown>) {
   return data
 }
 
+function removeExpiredToken() {
+  LocalStorage.remove(`${process.env.APP_NAME}_token`)
+  location.reload()
+  return 'yes'
+}
+
+function setupInterceptors(instance: AxiosInstance): AxiosInstance {
+  instance.interceptors.request.use(onRequest, onErrorResponse)
+  instance.interceptors.response.use(onResponse, onErrorResponse)
+  return instance
+}
+
 function onRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
-  // const { method, url } = config
-  // Set Headers Here
   config.headers.Authorization = `Bearer ${LocalStorage.getItem(`${process.env.APP_NAME}_token`)}`
-  // Check Authentication Here
-  //CHECK BEARER
-
-  // Set Loading Start Here
-  // logOnDev(`🚀 [API] ${method?.toUpperCase()} ${url} | Request`)
-
   config.data && (config.data = deleteEmptyValue(config.data as Record<string, unknown>))
   config.params && (config.params = deleteEmptyValue(config.params as Record<string, unknown>))
-
-  // if (method === 'get') {
-  //   config.timeout = 15000
-  // }
+  config.timeout = 15000
   return config
 }
-const api = axios.create({ baseURL: 'https://api.example.com' })
 
-export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
+function onResponse<T>(response: AxiosResponse<APIResponse<T>, any>) {
+  const { data, config, status } = response
+  const { method, url } = config
+  //This depends on your BE API structure, modify types in APIResponse
+  const { status_code } = data
+  //
+  if ([201, 401, 422, 500].includes(status_code)) return Promise.reject(data)
+  console.log(`🚀 [API] ${method?.toUpperCase()} ${url} | Request ${status} | API ${status_code}`)
+  return response
+}
 
-  app.config.globalProperties.$axios = axios
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
+function onErrorResponse(error: AxiosError | Error): Promise<AxiosError> {
+  if (axios.isAxiosError(error)) {
+    const { message, config, response } = error
+    if (config) {
+      const { method, url } = config
+      console.log(`🚨 [API] ${method?.toUpperCase()} ${url} | Request ${response?.status} ${message}`)
+    }
+    const { status } = response ?? {}
+    const statusCodeHandlers = {
+      '400': () => 'yes',
+      '401': removeExpiredToken,
+      '403': () => 'yes',
+      '404': removeExpiredToken,
+      '500': () => 'yes'
+    }
+    const handlerReturn = statusCodeHandlers[status?.toString() as keyof typeof statusCodeHandlers]()
+    if (handlerReturn === undefined) console.log(`🚨 [API] | Error ${error.message}`)
+    return Promise.reject(error.response?.data)
+  }
+  console.log(`🚨 [API] | Error ${error.message}`)
+  return Promise.reject(error)
+}
 
-  app.config.globalProperties.$api = api
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
-})
+const api = setupInterceptors(axios.create({ baseURL: process.env.END_POINT }))
 
 export { api }
