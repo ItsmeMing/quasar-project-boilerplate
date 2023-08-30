@@ -1,8 +1,8 @@
-import { route } from 'quasar/wrappers';
-import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useUserStore } from 'src/stores/user';
+import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import { route } from 'quasar/wrappers';
 import routes from './routes';
+import { useUserStore } from 'src/stores/user';
 
 /*
  * If not building with SSR mode, you can
@@ -33,13 +33,15 @@ export default route(function (/* { store, ssrContext } */) {
 
   Router.beforeEach(async (to, from, next) => {
     const { isAuthenticated, user } = storeToRefs(userStore);
+    const authRoute = to.meta.authRequired === true;
     if (isAuthenticated.value) {
       if (!user.value) await userStore.fetchUser();
-      if (to.matched.some((route) => route.meta.authRequired === false)) return next('/cac'); //set your custom route here
+      if (to.matched.some((route) => route.path === '/:catchAll(.*)*')) return next();
+      if (!authRoute) return next('/car-overview');
       // const permissionRequired = to.matched.find((route) => route.meta.required)?.meta.permission as string
       return next();
     }
-    if (to.fullPath === '/') return next('login');
+    if ((authRoute && to.path !== '/') || to.path === '/') return next('/login');
     next();
   });
 
