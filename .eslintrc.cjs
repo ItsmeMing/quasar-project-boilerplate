@@ -84,6 +84,12 @@ module.exports = {
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    'vue/multi-word-component-names': [
+      'error',
+      {
+        ignores: ['Index', 'Add', 'Edit', 'View', 'Login', 'Form', 'Button']
+      }
+    ]
   }
-}
+};

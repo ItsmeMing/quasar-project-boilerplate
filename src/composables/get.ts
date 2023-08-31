@@ -14,7 +14,6 @@ export async function useGet<T, U>(
     try {
       const { data } = await repo(params?.value);
       result.value = data.data;
-      console.log(data.data);
     } catch (error: unknown) {
       throw error;
     } finally {
