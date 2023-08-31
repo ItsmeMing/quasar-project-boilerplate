@@ -1,6 +1,6 @@
 import { REGEX_PATTERN_EMAIL_ADDRESS, REGEX_PATTERN_PHONE_NUMBER } from 'src/helpers/constants';
 
-const required = (val: unknown) => (val && String(val).length > 0) || 'Field is required!';
+const required = (val: unknown) => (val && String(val).length > 0) || 'This is a mandatory field!';
 
 const email = (email: string) =>
   email ? REGEX_PATTERN_EMAIL_ADDRESS.test(email.toLowerCase()) || 'Invalid email!' : true;
